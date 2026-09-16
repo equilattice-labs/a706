@@ -1,70 +1,74 @@
 import sharp from 'sharp'
 import { mkdir, writeFile } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import { basename, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { brand } from '../src/data/brand.js'
 
-// Canonical siftider artwork. All bitmap deliverables are rendered from these SVGs.
+// Loometric master artwork. Raster exports and the video derive from these SVGs.
 const website = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+// The nested local checkout shares the workspace's social and output folders.
+const workspace = resolve(website, basename(website) === 'a706' ? '../..' : '..')
 const publicAssets = resolve(website, 'public/assets')
-const socialAssets = resolve(website, '../twitter')
-const output = resolve(website, '../output')
-const color = {
-  paper: '#f4f6f2', ink: '#142e35', teal: '#147d74',
-  mint: '#d6eee4', muted: '#647571', line: '#cfdad4',
-}
-const font = 'Arial, Helvetica, sans-serif'
-const tagline = 'Clear signals. Considered moves.'
+const socialAssets = resolve(workspace, 'twitter')
+const output = resolve(workspace, 'output')
+const color = { midnight: '#0d141b', panel: '#141e27', lime: '#d9f879', white: '#edf2ed', muted: '#93a3ac', border: '#2b3944' }
+const font = 'Segoe UI, Arial, sans-serif'
+const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
-// A continuous S bends like a tidal channel; the separated short line is its current.
-const mark = (stroke = color.ink) => `<g fill="none" stroke="${stroke}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M76 20H43C29 20 22 28 22 38S30 53 43 53H57C70 53 78 59 78 68S71 82 57 82H24"/><path d="M44 36h30"/></g>`
-const logo = (x, y, scale = 1, stroke = color.ink) => `<g transform="translate(${x} ${y}) scale(${scale})">${mark(stroke)}</g>`
-const text = (x, y, value, size = 24, fill = color.ink, extra = '') => `<text x="${x}" y="${y}" font-family="${font}" font-size="${size}" fill="${fill}" ${extra}>${value}</text>`
-const line = (x1, y, x2, stroke = color.line) => `<path d="M${x1} ${y}H${x2}" stroke="${stroke}" fill="none"/>`
-const svg = (width, height, body, background = color.paper, title = 'siftider') => `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${title}"><title>${title}</title>${background ? `<rect width="${width}" height="${height}" fill="${background}"/>` : ''}${body}</svg>`
-const currents = (x, y, width = 900, height = 300, stroke = color.teal) => `<g transform="translate(${x} ${y}) scale(${width / 900} ${height / 300})" fill="none" stroke="${stroke}" stroke-width="2">${Array.from({ length: 9 }, (_, i) => `<path opacity="${0.14 + i * 0.075}" d="M-40 ${160 + i * 16} C170 ${160 + i * 16} 235 ${48 + i * 12} 445 ${48 + i * 12} S695 ${180 - i * 12} 940 ${-40 + i * 18}"/>`).join('')}</g>`
-const footer = (width, height, left = 'ROBINHOOD CHAIN / RESEARCH PREVIEW', dark = false) => `${line(80, height - 124, width - 80, dark ? '#375157' : color.line)}${text(80, height - 72, left, 17, dark ? color.mint : color.muted, 'letter-spacing="2"')}${text(width - 80, height - 72, 'siftider', 28, dark ? color.paper : color.ink, 'font-weight="700" text-anchor="end" letter-spacing="-1"')}`
+// Two interlocking L-shaped light paths connect a frame to its focus.
+const mark = (primary = color.lime, secondary = color.white) => `<path d="M18 16H34V66H84V82H18Z" fill="${primary}"/><path d="M46 16H62V38H84V54H46Z" fill="${secondary}"/>`
+const logo = (x, y, scale = 1, primary = color.lime, secondary = color.white) => `<g transform="translate(${x} ${y}) scale(${scale})">${mark(primary, secondary)}</g>`
+const text = (x, y, value, size = 24, fill = color.white, extra = '') => `<text x="${x}" y="${y}" font-family="${font}" font-size="${size}" fill="${fill}" ${extra}>${escape(value)}</text>`
+const heading = (x, y, value, size = 92, fill = color.white, extra = '') => text(x, y, value, size, fill, `font-weight="700" letter-spacing="-4" ${extra}`)
+const label = (x, y, value, fill = color.muted, extra = '') => text(x, y, value, 15, fill, `letter-spacing="2" ${extra}`)
+const line = (x1, y, x2, stroke = color.border) => `<path d="M${x1} ${y}H${x2}" stroke="${stroke}" fill="none"/>`
+const svg = (width, height, body, background = color.midnight, title = brand.name) => `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(title)}"><title>${escape(title)}</title>${background ? `<rect width="${width}" height="${height}" fill="${background}"/>` : ''}${body}</svg>`
+const wordmark = (x, y, scale = 1) => `${logo(x, y, .56 * scale)}${text(x + 65 * scale, y + 43 * scale, brand.name, 38 * scale, color.white, 'font-weight="600" letter-spacing="-1.5"')}`
+const footer = (width, height, left = 'RESEARCH PROTOTYPE / DEMO DATA') => `${line(80, height - 116, width - 80)}${label(80, height - 62, left)}${text(width - 80, height - 62, brand.name, 26, color.white, 'font-weight="600" text-anchor="end" letter-spacing="-1"')}`
+// Abstract connected paths. This identity artwork does not depict performance data.
+const weave = (x, y, scale = 1, scaleY = scale) => `<g transform="translate(${x} ${y}) scale(${scale} ${scaleY})" fill="none" stroke="${color.border}" stroke-width="2">${Array.from({ length: 5 }, (_, i) => `<path d="M0 ${i * 58}H${120 + i * 58}V348H560"/>`).join('')}<path d="M0 116H236V232H560" stroke="${color.lime}" stroke-width="4"/><path d="M0 290H120V58H560" stroke="${color.white}" stroke-width="2"/><rect x="228" y="108" width="16" height="16" fill="${color.lime}" stroke="${color.midnight}" stroke-width="4"/><rect x="112" y="282" width="16" height="16" fill="${color.white}" stroke="${color.midnight}" stroke-width="4"/></g>`
 
 await Promise.all([mkdir(publicAssets, { recursive: true }), mkdir(socialAssets, { recursive: true })])
-
-const markSvg = svg(100, 100, mark(), null, 'siftider mark')
-const markLight = svg(100, 100, mark(color.mint), null, 'siftider light mark')
-const favicon = svg(100, 100, `<rect width="100" height="100" rx="24" fill="${color.paper}"/>${logo(8, 8, 0.84)}`, null, 'siftider favicon')
+const favicon = svg(100, 100, `<rect width="100" height="100" rx="18" fill="${color.midnight}"/>${mark()}`, null, `${brand.name} favicon`)
 await Promise.all([
-  writeFile(resolve(publicAssets, 'siftider-mark.svg'), markSvg),
-  writeFile(resolve(publicAssets, 'siftider-mark-light.svg'), markLight),
-  writeFile(resolve(publicAssets, 'siftider-favicon.svg'), favicon),
-  sharp(Buffer.from(favicon)).resize(32, 32).png().toFile(resolve(publicAssets, 'siftider-favicon-32.png')),
-  sharp(Buffer.from(favicon)).resize(180, 180).png().toFile(resolve(publicAssets, 'siftider-apple-touch-icon.png')),
+  writeFile(resolve(publicAssets, `${brand.slug}-mark.svg`), svg(100, 100, mark(), null, `${brand.name} connected L mark`)),
+  writeFile(resolve(publicAssets, `${brand.slug}-mark-light.svg`), svg(100, 100, mark(color.white, color.white), null, `${brand.name} white connected L mark`)),
+  writeFile(resolve(publicAssets, `${brand.slug}-favicon.svg`), favicon),
+  sharp(Buffer.from(favicon)).resize(32, 32).png().toFile(resolve(publicAssets, `${brand.slug}-favicon-32.png`)),
+  sharp(Buffer.from(favicon)).resize(180, 180).png().toFile(resolve(publicAssets, `${brand.slug}-apple-touch-icon.png`)),
 ])
+const avatar = svg(800, 800, `<rect x="112" y="112" width="576" height="576" rx="50" fill="${color.panel}"/>${logo(75, 75, 6.5)}`, color.midnight, `${brand.name} avatar`)
+const banner = svg(1500, 500, `${weave(1020, 54, 1.15)}${wordmark(310, 54, 1.05)}${heading(322, 229, 'Find clarity in', 68)}${heading(322, 309, 'the connected market.', 65, color.lime)}${text(326, 389, brand.positioning, 26, color.muted)}`, color.midnight, `${brand.name} — ${brand.tagline}`)
+const og = svg(1200, 630, `${wordmark(69, 42)}${label(1120, 83, 'INDEPENDENT MARKET OBSERVATORY', color.muted, 'text-anchor="end"')}${heading(80, 234, 'Find clarity in', 76)}${heading(80, 319, 'the connected', 76, color.lime)}${heading(80, 404, 'market.', 76, color.lime)}${text(84, 473, brand.positioning, 23, color.muted)}<rect x="851" y="173" width="270" height="270" rx="20" fill="${color.panel}"/>${logo(874, 196, 2.24)}${footer(1200, 630)}`, color.midnight, `${brand.name} — ${brand.tagline}`)
 
-const avatar = svg(800, 800, `${logo(190, 190, 4.2, color.mint)}`, color.ink, 'siftider avatar')
-const banner = svg(1500, 500, `${currents(980, 24, 780, 450)}${logo(266, 128, 0.9)}${text(385, 213, 'siftider', 102, color.ink, 'font-weight="700" letter-spacing="-6"')}${text(391, 275, tagline, 29)}${text(392, 346, 'MARKET RESEARCH, IN PERSPECTIVE.', 14, color.muted, 'letter-spacing="3"')}`, color.paper, 'siftider - Clear signals. Considered moves.')
-const og = svg(1200, 630, `${logo(72, 46, 0.57)}${text(146, 88, 'siftider', 43, color.ink, 'font-weight="700" letter-spacing="-2"')}${currents(830, 153, 500, 330)}${text(80, 273, 'Clear signals.', 77, color.ink, 'font-weight="700" letter-spacing="-3"')}${text(80, 367, 'Considered moves.', 77, color.ink, 'font-weight="700" letter-spacing="-3"')}${text(84, 432, 'Market research, in perspective.', 26, color.muted)}${footer(1200, 630)}`, color.paper, 'siftider - Clear signals. Considered moves.')
-
-const firstPost = svg(1200, 1200, `${logo(75, 68, 0.55)}${text(150, 109, 'siftider', 38, color.ink, 'font-weight="700" letter-spacing="-2"')}${text(1120, 108, '01 / PERSPECTIVE', 18, color.muted, 'text-anchor="end" letter-spacing="2"')}${text(80, 286, 'Clear signals.', 94, color.ink, 'font-weight="700" letter-spacing="-4"')}${text(80, 397, 'Considered moves.', 94, color.ink, 'font-weight="700" letter-spacing="-4"')}${text(84, 467, 'Bring market context into focus.', 30, color.muted)}${currents(-10, 580, 1270, 370)}<circle cx="681" cy="705" r="10" fill="${color.teal}"/><circle cx="681" cy="705" r="21" fill="none" stroke="${color.teal}" stroke-opacity=".3"/>${footer(1200, 1200)}`, color.paper, 'siftider - Clear signals. Considered moves.')
-const secondPost = svg(1200, 1200, `${logo(75, 68, 0.55)}${text(150, 109, 'siftider', 38, color.ink, 'font-weight="700" letter-spacing="-2"')}${text(1120, 108, '02 / CONTEXT', 18, color.muted, 'text-anchor="end" letter-spacing="2"')}${text(80, 286, 'Consider the', 94, color.ink, 'font-weight="700" letter-spacing="-4"')}${text(80, 397, 'whole picture.', 94, color.ink, 'font-weight="700" letter-spacing="-4"')}${text(84, 467, 'Compare price, activity, and conviction.', 30, color.muted)}<rect x="80" y="596" width="1040" height="362" rx="18" fill="${color.mint}"/>${['OBSERVE', 'COMPARE', 'DECIDE'].map((value, i) => `${text(122 + i * 338, 654, `0${i + 1}`, 18, color.teal)}${text(122 + i * 338, 894, value, 23, color.ink, 'letter-spacing="2"')}`).join('')}<path d="M418 634V917M756 634V917" stroke="${color.teal}" stroke-opacity=".2"/><g fill="none" stroke="${color.teal}" stroke-width="3"><path d="M126 790H195L225 740L255 825L285 766H334"/><path d="M466 809H663M466 775H600M466 741H630"/><path d="m827 780 37 37 93-93"/></g>${footer(1200, 1200)}`, color.paper, 'siftider - Consider the whole picture.')
-const thirdPost = svg(1200, 1200, `${logo(75, 68, 0.55, color.mint)}${text(150, 109, 'siftider', 38, color.paper, 'font-weight="700" letter-spacing="-2"')}${text(1120, 108, '03 / INTENTION', 18, color.mint, 'text-anchor="end" letter-spacing="2"')}${text(80, 286, 'Make room', 94, color.paper, 'font-weight="700" letter-spacing="-4"')}${text(80, 397, 'for perspective.', 94, color.paper, 'font-weight="700" letter-spacing="-4"')}${text(84, 467, tagline, 30, color.mint)}${currents(160, 570, 1150, 360, color.mint)}${footer(1200, 1200, 'ROBINHOOD CHAIN / RESEARCH PREVIEW', true)}`, color.ink, 'siftider - Make room for perspective.')
+const firstPost = svg(1200, 1200, `${wordmark(72, 62)}${label(1120, 105, '01 / CONNECT THE CONTEXT', color.muted, 'text-anchor="end"')}${heading(80, 280, 'Find clarity in', 94)}${heading(80, 388, 'the connected', 94, color.lime)}${heading(80, 496, 'market.', 94, color.lime)}${text(84, 574, brand.positioning, 29, color.muted)}${line(80, 635, 1120)}${label(84, 683, 'PUBLIC CONVERSATION')}${label(1120, 683, 'A MORE INFORMED VIEW', color.lime, 'text-anchor="end"')}${weave(80, 731, 1.86, .75)}${footer(1200, 1200)}`, color.midnight, `${brand.name} — ${brand.tagline}`)
+const steps = [
+  { name: 'Observe', note: 'Notice the conversation.', art: '<path d="M137 791H278M208 720V861"/><rect x="164" y="748" width="86" height="86"/><rect x="192" y="776" width="31" height="31" fill="currentColor" stroke="none"/>' },
+  { name: 'Connect', note: 'Bring the context together.', art: '<path d="M487 750H545V820H630V750H669"/><rect x="478" y="741" width="18" height="18" fill="currentColor" stroke="none"/><rect x="660" y="741" width="18" height="18" fill="currentColor" stroke="none"/>' },
+  { name: 'Consider', note: 'Build an independent view.', art: '<path d="M847 735H1009V845H924L882 874V845H847Z"/><path d="M877 770H979M877 805H949"/>' },
+]
+const secondPost = svg(1200, 1200, `${wordmark(72, 62)}${label(1120, 105, '02 / LOOK BEYOND THE SIGNAL', color.muted, 'text-anchor="end"')}${heading(80, 285, 'Context makes', 93)}${heading(80, 392, 'the difference.', 93, color.lime)}${text(84, 484, 'A market observation is a starting point.', 29, color.muted)}${text(84, 531, 'Look at what connects it to the bigger picture.', 29, color.muted)}${steps.map((step, i) => `<rect x="${80 + i * 354}" y="626" width="330" height="368" rx="12" fill="${color.panel}" stroke="${color.border}"/>${label(104 + i * 354, 677, `0${i + 1}`, color.lime)}<g fill="none" stroke="${color.lime}" color="${color.lime}" stroke-width="3" stroke-linejoin="miter">${step.art}</g>${text(104 + i * 354, 926, step.name, 33, color.white, 'font-weight="600" letter-spacing="-1"')}${text(104 + i * 354, 965, step.note, 18, color.muted)}`).join('')}${footer(1200, 1200)}`, color.midnight, `${brand.name} — Context makes the difference.`)
+const thirdPost = svg(1200, 1200, `${wordmark(72, 62)}${label(1120, 105, '03 / YOUR RESEARCH, IN FOCUS', color.muted, 'text-anchor="end"')}${heading(80, 285, 'A clearer view.', 94)}${heading(80, 392, 'One step closer.', 91, color.lime)}${text(84, 484, 'Explore. Save. Compare the context.', 29, color.muted)}${['Discover a market.', 'Save your observations.', 'Inspect the details.'].map((value, i) => `${line(80, 602 + i * 113, 714)}${label(84, 666 + i * 113, `0${i + 1}`, color.lime)}${text(145, 668 + i * 113, value, 30)}`).join('')}<rect x="782" y="632" width="336" height="336" rx="22" fill="${color.panel}"/>${logo(798, 648, 3.04)}${label(84, 1008, 'ILLUSTRATIVE DATA. NO TRADES ARE SENT.')}${footer(1200, 1200)}`, color.midnight, `${brand.name} — A clearer view. One step closer.`)
 
 async function renderSet(directory, name, artwork, includeJpeg = true) {
   await writeFile(resolve(directory, `${name}.svg`), artwork)
   await sharp(Buffer.from(artwork)).png().toFile(resolve(directory, `${name}.png`))
   if (includeJpeg) await sharp(Buffer.from(artwork)).jpeg({ quality: 95 }).toFile(resolve(directory, `${name}.jpg`))
 }
-
-await renderSet(publicAssets, 'siftider-og', og, false)
-await renderSet(socialAssets, 'siftider-avatar', avatar)
-await renderSet(socialAssets, 'siftider-banner', banner)
+await renderSet(publicAssets, `${brand.slug}-og`, og, false)
+await renderSet(socialAssets, `${brand.slug}-avatar`, avatar)
+await renderSet(socialAssets, `${brand.slug}-banner`, banner)
 await renderSet(socialAssets, 'post-01-signal', firstPost)
 await renderSet(socialAssets, 'post-02-verify', secondPost)
 await renderSet(socialAssets, 'post-03-open', thirdPost)
 
-// Optional reproducible launch clip: requires ffmpeg on PATH, no audio track.
+// Optional reproducible introduction: FFmpeg required, no audio track.
 if (process.argv.includes('--video')) {
   await mkdir(output, { recursive: true })
-  const result = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-loop', '1', '-i', resolve(socialAssets, 'post-01-signal.png'), '-vf', "scale=2400:2400,zoompan=z='1+0.0001*on':x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2':d=240:s=1200x1200:fps=30,format=yuv420p", '-t', '8', '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart', '-an', resolve(output, 'post-01-signal.mp4')], { stdio: 'inherit' })
+  const result = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-loop', '1', '-i', resolve(socialAssets, 'post-01-signal.png'), '-vf', "scale=2400:2400,zoompan=z='1+0.0001*on':x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2':d=240:s=1200x1200:fps=30,format=yuv420p", '-t', '8', '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart', '-an', resolve(output, `${brand.slug}-intro.mp4`)], { stdio: 'inherit' })
   if (result.error) throw result.error
   if (result.status !== 0) throw new Error(`ffmpeg exited with ${result.status}`)
-  console.log('Rendered siftider launch clip: 1200x1200, 8 seconds, 30 fps.')
+  console.log(`Rendered ${brand.name} introduction: 1200x1200, 8 seconds, 30 fps.`)
 }
-console.log('Rendered siftider marks, favicon, OG card, avatar, banner, and three launch cards.')
+console.log(`Rendered ${brand.name} marks, favicon, OG card, avatar, banner, and three social cards.`)
