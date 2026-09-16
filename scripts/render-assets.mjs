@@ -5,70 +5,67 @@ import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { brand } from '../src/data/brand.js'
 
-// Loometric master artwork. Raster exports and the video derive from these SVGs.
+// Canonical vector artwork; all raster and motion assets derive from these sources.
 const website = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-// The nested local checkout shares the workspace's social and output folders.
 const workspace = resolve(website, basename(website) === 'a706' ? '../..' : '..')
 const publicAssets = resolve(website, 'public/assets')
 const socialAssets = resolve(workspace, 'twitter')
-const output = resolve(workspace, 'output')
-const color = { midnight: '#0d141b', panel: '#141e27', lime: '#d9f879', white: '#edf2ed', muted: '#93a3ac', border: '#2b3944' }
-const font = 'Segoe UI, Arial, sans-serif'
-const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+const output = resolve(workspace, 'output/current')
+const c = { paper: '#f5f3ed', white: '#fffefa', ink: '#202522', blue: '#244bd8', muted: '#60675f', line: '#d7dcd5' }
+const sans = 'Segoe UI, Arial, sans-serif'
+const serif = 'Georgia, Times New Roman, serif'
+const esc = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+const text = (x, y, value, size = 24, fill = c.ink, extra = '') => `<text x="${x}" y="${y}" font-family="${sans}" font-size="${size}" fill="${fill}" ${extra}>${esc(value)}</text>`
+const headline = (x, y, value, size = 88, fill = c.ink, extra = '') => `<text x="${x}" y="${y}" font-family="${serif}" font-size="${size}" fill="${fill}" letter-spacing="-3" ${extra}>${esc(value)}</text>`
+const label = (x, y, value, fill = c.muted, extra = '') => text(x, y, value, 15, fill, `letter-spacing="2" ${extra}`)
+const rule = (x, y, width, stroke = c.line) => `<path d="M${x} ${y}h${width}" stroke="${stroke}"/>`
+const svg = (w, h, body, bg = c.paper, title = brand.name) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>${bg ? `<rect width="${w}" height="${h}" fill="${bg}"/>` : ''}${body}</svg>`
 
-// Two interlocking L-shaped light paths connect a frame to its focus.
-const mark = (primary = color.lime, secondary = color.white) => `<path d="M18 16H34V66H84V82H18Z" fill="${primary}"/><path d="M46 16H62V38H84V54H46Z" fill="${secondary}"/>`
-const logo = (x, y, scale = 1, primary = color.lime, secondary = color.white) => `<g transform="translate(${x} ${y}) scale(${scale})">${mark(primary, secondary)}</g>`
-const text = (x, y, value, size = 24, fill = color.white, extra = '') => `<text x="${x}" y="${y}" font-family="${font}" font-size="${size}" fill="${fill}" ${extra}>${escape(value)}</text>`
-const heading = (x, y, value, size = 92, fill = color.white, extra = '') => text(x, y, value, size, fill, `font-weight="700" letter-spacing="-4" ${extra}`)
-const label = (x, y, value, fill = color.muted, extra = '') => text(x, y, value, 15, fill, `letter-spacing="2" ${extra}`)
-const line = (x1, y, x2, stroke = color.border) => `<path d="M${x1} ${y}H${x2}" stroke="${stroke}" fill="none"/>`
-const svg = (width, height, body, background = color.midnight, title = brand.name) => `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(title)}"><title>${escape(title)}</title>${background ? `<rect width="${width}" height="${height}" fill="${background}"/>` : ''}${body}</svg>`
-const wordmark = (x, y, scale = 1) => `${logo(x, y, .56 * scale)}${text(x + 65 * scale, y + 43 * scale, brand.name, 38 * scale, color.white, 'font-weight="600" letter-spacing="-1.5"')}`
-const footer = (width, height, left = 'RESEARCH PROTOTYPE / DEMO DATA') => `${line(80, height - 116, width - 80)}${label(80, height - 62, left)}${text(width - 80, height - 62, brand.name, 26, color.white, 'font-weight="600" text-anchor="end" letter-spacing="-1"')}`
-// Abstract connected paths. This identity artwork does not depict performance data.
-const weave = (x, y, scale = 1, scaleY = scale) => `<g transform="translate(${x} ${y}) scale(${scale} ${scaleY})" fill="none" stroke="${color.border}" stroke-width="2">${Array.from({ length: 5 }, (_, i) => `<path d="M0 ${i * 58}H${120 + i * 58}V348H560"/>`).join('')}<path d="M0 116H236V232H560" stroke="${color.lime}" stroke-width="4"/><path d="M0 290H120V58H560" stroke="${color.white}" stroke-width="2"/><rect x="228" y="108" width="16" height="16" fill="${color.lime}" stroke="${color.midnight}" stroke-width="4"/><rect x="112" y="282" width="16" height="16" fill="${color.white}" stroke="${color.midnight}" stroke-width="4"/></g>`
+// Two offset index pages and a detached focus tile, independent of old letter marks.
+const mark = (primary = c.blue, secondary = c.ink) => `<path d="M14 16H51V28H26V70H14Z" fill="${secondary}"/><path d="M38 36H76V84H38Z M50 48V72H64V48Z" fill="${primary}" fill-rule="evenodd"/><rect x="66" y="16" width="18" height="12" fill="${primary}"/>`
+const logo = (x, y, size = 1, primary = c.blue, secondary = c.ink) => `<g transform="translate(${x} ${y}) scale(${size})">${mark(primary, secondary)}</g>`
+const wordmark = (x, y, size = 1, ink = c.ink, accent = c.blue) => `${logo(x, y, .58 * size, accent, ink)}${text(x + 69 * size, y + 44 * size, brand.name, 35 * size, ink, 'font-weight="600" letter-spacing="-1.3"')}`
+const footer = (w, h, note = 'RESEARCH PROTOTYPE / SAMPLE DATA') => `${rule(70, h - 103, w - 140)}${label(70, h - 56, note)}${text(w - 70, h - 55, brand.name, 24, c.ink, 'text-anchor="end" font-weight="600"')}`
+const sheet = (x, y, width, height, angle = 0) => `<g transform="translate(${x} ${y}) rotate(${angle})"><rect width="${width}" height="${height}" fill="${c.white}" stroke="${c.ink}" stroke-width="2"/><rect x="22" y="22" width="28" height="12" fill="${c.blue}"/>${Array.from({ length: 5 }, (_, i) => rule(22, 65 + i * 24, width - 44)).join('')}<path d="M22 ${height - 37}H${width - 22}" stroke="${c.blue}" stroke-width="3"/></g>`
+const paperArt = (x, y, scale = 1) => `<g transform="translate(${x} ${y}) scale(${scale})">${sheet(41, 28, 200, 256, -10)}${sheet(76, 12, 200, 256, 8)}<rect x="236" y="207" width="68" height="68" fill="${c.blue}"/><path d="M253 242H287M273 228L287 242L273 256" fill="none" stroke="${c.white}" stroke-width="3"/></g>`
 
-await Promise.all([mkdir(publicAssets, { recursive: true }), mkdir(socialAssets, { recursive: true })])
-const favicon = svg(100, 100, `<rect width="100" height="100" rx="18" fill="${color.midnight}"/>${mark()}`, null, `${brand.name} favicon`)
+await Promise.all([mkdir(publicAssets, { recursive: true }), mkdir(socialAssets, { recursive: true }), mkdir(output, { recursive: true })])
+const favicon = svg(100, 100, `<rect width="100" height="100" rx="12" fill="${c.paper}"/>${mark()}`, null, `${brand.name} index mark`)
 await Promise.all([
-  writeFile(resolve(publicAssets, `${brand.slug}-mark.svg`), svg(100, 100, mark(), null, `${brand.name} connected L mark`)),
-  writeFile(resolve(publicAssets, `${brand.slug}-mark-light.svg`), svg(100, 100, mark(color.white, color.white), null, `${brand.name} white connected L mark`)),
+  writeFile(resolve(publicAssets, `${brand.slug}-mark.svg`), svg(100, 100, mark(), null, `${brand.name} index mark`)),
+  writeFile(resolve(publicAssets, `${brand.slug}-mark-light.svg`), svg(100, 100, mark(c.white, c.white), null, `${brand.name} white mark`)),
   writeFile(resolve(publicAssets, `${brand.slug}-favicon.svg`), favicon),
   sharp(Buffer.from(favicon)).resize(32, 32).png().toFile(resolve(publicAssets, `${brand.slug}-favicon-32.png`)),
   sharp(Buffer.from(favicon)).resize(180, 180).png().toFile(resolve(publicAssets, `${brand.slug}-apple-touch-icon.png`)),
 ])
-const avatar = svg(800, 800, `<rect x="112" y="112" width="576" height="576" rx="50" fill="${color.panel}"/>${logo(75, 75, 6.5)}`, color.midnight, `${brand.name} avatar`)
-const banner = svg(1500, 500, `${weave(1020, 54, 1.15)}${wordmark(310, 54, 1.05)}${heading(322, 229, 'Find clarity in', 68)}${heading(322, 309, 'the connected market.', 65, color.lime)}${text(326, 389, brand.positioning, 26, color.muted)}`, color.midnight, `${brand.name} — ${brand.tagline}`)
-const og = svg(1200, 630, `${wordmark(69, 42)}${label(1120, 83, 'INDEPENDENT MARKET OBSERVATORY', color.muted, 'text-anchor="end"')}${heading(80, 234, 'Find clarity in', 76)}${heading(80, 319, 'the connected', 76, color.lime)}${heading(80, 404, 'market.', 76, color.lime)}${text(84, 473, brand.positioning, 23, color.muted)}<rect x="851" y="173" width="270" height="270" rx="20" fill="${color.panel}"/>${logo(874, 196, 2.24)}${footer(1200, 630)}`, color.midnight, `${brand.name} — ${brand.tagline}`)
+const avatar = svg(800, 800, logo(86, 86, 6.28, c.white, c.white), c.blue, `${brand.name} avatar`)
+// Keep title clear of X's lower-left avatar crop.
+const banner = svg(1500, 500, `${wordmark(317, 48)}${rule(332, 143, 1080)}${label(336, 190, 'THE INDEPENDENT RESEARCH DESK')}${headline(330, 288, 'A little context.', 78)}${headline(330, 377, 'A clearer perspective.', 78, c.blue)}${label(338, 448, 'EXPLORE / COMPARE / CONSIDER')}${paperArt(1130, 185, .77)}`, c.paper, `${brand.name} research desk banner`)
+const og = svg(1200, 630, `${wordmark(59, 38)}${label(1128, 80, 'AN INDEPENDENT RESEARCH DESK', c.muted, 'text-anchor="end"')}${rule(70, 130, 1060)}${headline(70, 252, 'A little context.', 84)}${headline(70, 356, 'A clearer', 84, c.blue)}${headline(70, 449, 'perspective.', 84, c.blue)}${paperArt(817, 191, .93)}${footer(1200, 630)}`, c.paper, `${brand.name} — ${brand.tagline}`)
+const post1 = svg(1200, 1200, `${wordmark(58, 48)}${label(1125, 90, '01 / THE RESEARCH DESK', c.muted, 'text-anchor="end"')}${rule(70, 137, 1060)}${headline(70, 276, 'A little context.', 106)}${headline(70, 397, 'A clearer', 106, c.blue)}${headline(70, 519, 'perspective.', 106, c.blue)}${text(74, 603, brand.positioning, 29, c.muted)}<rect x="70" y="673" width="1060" height="363" fill="${c.blue}"/>${headline(108, 840, 'Make room', 73, c.white)}${headline(108, 927, 'for a better question.', 62, c.white)}${paperArt(770, 700, 1)}${footer(1200, 1200)}`, c.paper, `${brand.name} introduction`)
+const post2 = svg(1200, 1200, `${wordmark(58, 48)}${label(1125, 90, '02 / THE METHOD', c.muted, 'text-anchor="end"')}${rule(70, 137, 1060)}${headline(70, 272, 'Read beyond', 105)}${headline(70, 392, 'the number.', 105, c.blue)}${text(74, 479, 'An observation starts the research. Context carries it forward.', 27, c.muted)}${[
+  ['01', 'Explore.', 'Find an asset. Notice what you want to understand.'],
+  ['02', 'Compare.', 'Put sample trends and asset details side by side.'],
+  ['03', 'Consider.', 'Save your research. Form an independent view.'],
+].map(([n, title, note], i) => `${rule(70, 572 + i * 155, 1060)}${label(78, 635 + i * 155, n, c.blue)}${headline(151, 644 + i * 155, title, 55)}${text(502, 635 + i * 155, note, 22, c.muted)}`).join('')}${footer(1200, 1200)}`, c.paper, `${brand.name} research method`)
+const post3 = svg(1200, 1200, `${wordmark(58, 48)}${label(1125, 90, '03 / YOUR OWN PERSPECTIVE', c.muted, 'text-anchor="end"')}${rule(70, 137, 1060)}${headline(70, 283, 'Your next idea', 101)}${headline(70, 404, 'starts with a view.', 101, c.blue)}${text(74, 492, 'Search. Save. Compare. Take your time.', 30, c.muted)}<rect x="70" y="582" width="580" height="431" fill="${c.white}" stroke="${c.line}"/>${label(101, 637, 'IN THIS PROTOTYPE')}${['Five sample markets', 'A watchlist on your device', 'Two-asset comparisons', 'Downloadable order previews'].map((v, i) => `${rule(101, 678 + i * 77, 518)}${text(111, 726 + i * 77, v, 25)}${text(603, 726 + i * 77, '↗', 26, c.blue, 'text-anchor="end"')}`).join('')}${paperArt(739, 680, 1.05)}${footer(1200, 1200, 'ILLUSTRATIVE DATA / NO TRADES ARE SENT')}`, c.paper, `${brand.name} product preview`)
 
-const firstPost = svg(1200, 1200, `${wordmark(72, 62)}${label(1120, 105, '01 / CONNECT THE CONTEXT', color.muted, 'text-anchor="end"')}${heading(80, 280, 'Find clarity in', 94)}${heading(80, 388, 'the connected', 94, color.lime)}${heading(80, 496, 'market.', 94, color.lime)}${text(84, 574, brand.positioning, 29, color.muted)}${line(80, 635, 1120)}${label(84, 683, 'PUBLIC CONVERSATION')}${label(1120, 683, 'A MORE INFORMED VIEW', color.lime, 'text-anchor="end"')}${weave(80, 731, 1.86, .75)}${footer(1200, 1200)}`, color.midnight, `${brand.name} — ${brand.tagline}`)
-const steps = [
-  { name: 'Observe', note: 'Notice the conversation.', art: '<path d="M137 791H278M208 720V861"/><rect x="164" y="748" width="86" height="86"/><rect x="192" y="776" width="31" height="31" fill="currentColor" stroke="none"/>' },
-  { name: 'Connect', note: 'Bring the context together.', art: '<path d="M487 750H545V820H630V750H669"/><rect x="478" y="741" width="18" height="18" fill="currentColor" stroke="none"/><rect x="660" y="741" width="18" height="18" fill="currentColor" stroke="none"/>' },
-  { name: 'Consider', note: 'Build an independent view.', art: '<path d="M847 735H1009V845H924L882 874V845H847Z"/><path d="M877 770H979M877 805H949"/>' },
-]
-const secondPost = svg(1200, 1200, `${wordmark(72, 62)}${label(1120, 105, '02 / LOOK BEYOND THE SIGNAL', color.muted, 'text-anchor="end"')}${heading(80, 285, 'Context makes', 93)}${heading(80, 392, 'the difference.', 93, color.lime)}${text(84, 484, 'A market observation is a starting point.', 29, color.muted)}${text(84, 531, 'Look at what connects it to the bigger picture.', 29, color.muted)}${steps.map((step, i) => `<rect x="${80 + i * 354}" y="626" width="330" height="368" rx="12" fill="${color.panel}" stroke="${color.border}"/>${label(104 + i * 354, 677, `0${i + 1}`, color.lime)}<g fill="none" stroke="${color.lime}" color="${color.lime}" stroke-width="3" stroke-linejoin="miter">${step.art}</g>${text(104 + i * 354, 926, step.name, 33, color.white, 'font-weight="600" letter-spacing="-1"')}${text(104 + i * 354, 965, step.note, 18, color.muted)}`).join('')}${footer(1200, 1200)}`, color.midnight, `${brand.name} — Context makes the difference.`)
-const thirdPost = svg(1200, 1200, `${wordmark(72, 62)}${label(1120, 105, '03 / YOUR RESEARCH, IN FOCUS', color.muted, 'text-anchor="end"')}${heading(80, 285, 'A clearer view.', 94)}${heading(80, 392, 'One step closer.', 91, color.lime)}${text(84, 484, 'Explore. Save. Compare the context.', 29, color.muted)}${['Discover a market.', 'Save your observations.', 'Inspect the details.'].map((value, i) => `${line(80, 602 + i * 113, 714)}${label(84, 666 + i * 113, `0${i + 1}`, color.lime)}${text(145, 668 + i * 113, value, 30)}`).join('')}<rect x="782" y="632" width="336" height="336" rx="22" fill="${color.panel}"/>${logo(798, 648, 3.04)}${label(84, 1008, 'ILLUSTRATIVE DATA. NO TRADES ARE SENT.')}${footer(1200, 1200)}`, color.midnight, `${brand.name} — A clearer view. One step closer.`)
-
-async function renderSet(directory, name, artwork, includeJpeg = true) {
+async function render(directory, name, artwork, format = 'png') {
   await writeFile(resolve(directory, `${name}.svg`), artwork)
-  await sharp(Buffer.from(artwork)).png().toFile(resolve(directory, `${name}.png`))
-  if (includeJpeg) await sharp(Buffer.from(artwork)).jpeg({ quality: 95 }).toFile(resolve(directory, `${name}.jpg`))
+  const pipeline = sharp(Buffer.from(artwork))
+  await (format === 'jpg' ? pipeline.jpeg({ quality: 94 }) : pipeline.png()).toFile(resolve(directory, `${name}.${format}`))
 }
-await renderSet(publicAssets, `${brand.slug}-og`, og, false)
-await renderSet(socialAssets, `${brand.slug}-avatar`, avatar)
-await renderSet(socialAssets, `${brand.slug}-banner`, banner)
-await renderSet(socialAssets, 'post-01-signal', firstPost)
-await renderSet(socialAssets, 'post-02-verify', secondPost)
-await renderSet(socialAssets, 'post-03-open', thirdPost)
+await render(publicAssets, `${brand.slug}-og`, og)
+await render(socialAssets, `${brand.slug}-avatar`, avatar)
+await render(socialAssets, `${brand.slug}-banner`, banner)
+await render(socialAssets, 'post-01-introduction', post1, 'jpg')
+await render(socialAssets, 'post-02-method', post2, 'jpg')
+await render(socialAssets, 'post-03-workspace', post3, 'jpg')
 
-// Optional reproducible introduction: FFmpeg required, no audio track.
 if (process.argv.includes('--video')) {
-  await mkdir(output, { recursive: true })
-  const result = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-loop', '1', '-i', resolve(socialAssets, 'post-01-signal.png'), '-vf', "scale=2400:2400,zoompan=z='1+0.0001*on':x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2':d=240:s=1200x1200:fps=30,format=yuv420p", '-t', '8', '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart', '-an', resolve(output, `${brand.slug}-intro.mp4`)], { stdio: 'inherit' })
+  const result = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-loop', '1', '-i', resolve(socialAssets, 'post-01-introduction.jpg'), '-vf', "scale=2400:2400,zoompan=z='1+0.0001*on':x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2':d=240:s=1200x1200:fps=30,format=yuv420p", '-t', '8', '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart', '-an', resolve(output, `${brand.slug}-intro.mp4`)], { stdio: 'inherit' })
   if (result.error) throw result.error
-  if (result.status !== 0) throw new Error(`ffmpeg exited with ${result.status}`)
+  if (result.status !== 0) throw new Error(`FFmpeg exited with ${result.status}`)
   console.log(`Rendered ${brand.name} introduction: 1200x1200, 8 seconds, 30 fps.`)
 }
-console.log(`Rendered ${brand.name} marks, favicon, OG card, avatar, banner, and three social cards.`)
+console.log(`Rendered ${brand.name} website identity, avatar, banner, and three social cards.`)

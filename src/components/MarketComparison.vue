@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, ref, watch } from 'vue'
 import { money } from '../data/markets'
 
@@ -33,7 +33,7 @@ const signedChange = value => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`
 <template>
   <section class="market-comparison" aria-label="Sample market trend and comparison">
     <div class="comparison-heading">
-      <div><h3>See the wider picture</h3><p>Illustrative trend · normalized 0–100</p></div>
+      <div><h3>The pattern, in context</h3><p>Illustrative trend · normalized 0–100</p></div>
       <span class="comparison-period">7D SAMPLE</span>
     </div>
     <div class="comparison-controls">
@@ -77,29 +77,29 @@ const signedChange = value => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`
 </template>
 
 <style scoped>
-.market-comparison { --comparison-text: #edf2ed; --comparison-muted: #a0b0bc; --comparison-line: #2a3943; color: var(--comparison-text); font-family: 'Segoe UI', Arial, sans-serif; width: 100%; min-width: 0; }
+.market-comparison { --comparison-text: var(--ink); --comparison-muted: var(--muted); --comparison-line: var(--line); color: var(--comparison-text); font-family: var(--font); width: 100%; min-width: 0; }
 .comparison-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
 .comparison-heading h3 { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; letter-spacing: -.25px; }
 .comparison-heading p { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--comparison-muted); }
-.comparison-period { flex-shrink: 0; padding: 5px 7px; border: 1px solid var(--comparison-line); border-radius: 4px; font-size: 9px; letter-spacing: .9px; color: var(--comparison-muted); white-space: nowrap; }
+.comparison-period { flex-shrink: 0; padding: 5px 7px; border: 1px solid var(--comparison-line); border-radius: var(--radius); font-size: 9px; letter-spacing: .9px; color: var(--comparison-muted); white-space: nowrap; }
 .comparison-controls { margin: 18px 0 16px; }
 .comparison-controls label { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--comparison-muted); }
-.comparison-controls select { flex: 1; min-width: 0; width: 0; min-height: 42px; padding: 8px 28px 8px 12px; background: #1a2731; color: var(--comparison-text); border: 1px solid var(--comparison-line); border-radius: 6px; font: inherit; color-scheme: dark; cursor: pointer; }
-.comparison-controls select:hover { border-color: #71828b; }
-.comparison-controls select:focus-visible { outline: 2px solid #d9f879; outline-offset: 3px; }
+.comparison-controls select { flex: 1; min-width: 0; width: 0; min-height: 44px; padding: 8px 28px 8px 12px; background: var(--paper); color: var(--comparison-text); border: 1px solid var(--comparison-line); border-radius: var(--radius); font: inherit; color-scheme: light; cursor: pointer; }
+.comparison-controls select:hover { border-color: var(--line-strong); }
+.comparison-controls select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .comparison-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 11px; color: var(--comparison-text); }
 .comparison-legend > span { display: inline-flex; align-items: center; gap: 7px; }
-.comparison-legend i { display: inline-block; width: 20px; height: 0; border-top: 2px solid #d9f879; }
-.comparison-legend .secondary-key { border-color: #7ed9cb; border-top-style: dashed; }
+.comparison-legend i { display: inline-block; width: 20px; height: 0; border-top: 2px solid var(--accent); }
+.comparison-legend .secondary-key { border-color: #976035; border-top-style: dashed; }
 .comparison-chart { display: block; width: 100%; height: auto; overflow: visible; margin: 10px 0 0; }
 .chart-grid { fill: none; stroke: var(--comparison-line); stroke-width: .7; }
 .chart-grid path + path { stroke-dasharray: 2 5; }
 .chart-axis { fill: var(--comparison-muted); font-size: 10px; }
 .primary-trend, .secondary-trend { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.primary-trend { stroke: #d9f879; }
-.secondary-trend { stroke: #7ed9cb; stroke-dasharray: 5 5; }
-.primary-end { fill: #d9f879; }
-.secondary-end { fill: #141e27; stroke: #7ed9cb; stroke-width: 2; }
+.primary-trend { stroke: var(--accent); }
+.secondary-trend { stroke: #976035; stroke-dasharray: 5 5; }
+.primary-end { fill: var(--accent); }
+.secondary-end { fill: var(--surface); stroke: #976035; stroke-width: 2; }
 .comparison-caption { margin: 8px 0 0; color: var(--comparison-muted); font-size: 10px; line-height: 1.6; }
 .comparison-empty { padding: 32px 12px; text-align: center; color: var(--comparison-muted); font-size: 13px; }
 .comparison-table-wrap { margin-top: 20px; }
@@ -108,10 +108,10 @@ const signedChange = value => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`
 .comparison-table th, .comparison-table td { padding: 10px 0; border-bottom: 1px solid var(--comparison-line); text-align: right; font-weight: 400; }
 .comparison-table th:first-child { text-align: left; width: 38%; color: var(--comparison-muted); }
 .comparison-table thead th { font-weight: 600; }
-.comparison-table .primary-heading { color: #d9f879; }
-.comparison-table .secondary-heading { color: #7ed9cb; }
+.comparison-table .primary-heading { color: var(--accent); }
+.comparison-table .secondary-heading { color: #976035; }
 .comparison-table small { padding-left: 2px; color: var(--comparison-muted); font-size: 9px; }
-.comparison-table .is-negative { color: #f5a795; }
+.comparison-table .is-negative { color: var(--danger); }
 .comparison-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (max-width: 380px) {
   .comparison-heading { gap: 8px; }
