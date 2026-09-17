@@ -1,5 +1,4 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { arcChain } from '../data/network.js'
 
 export function useWallet() {
   const address = ref('')
@@ -69,11 +68,11 @@ export function useWallet() {
     const requestProvider = provider
     const isCurrentRequest = () => !disposed && revision === sessionRevision && provider === requestProvider
     try {
-      await requestProvider.request({ method: 'wallet_addEthereumChain', params: [arcChain.wallet] })
+      await requestProvider.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x1237', chainName: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://rpc.mainnet.chain.robinhood.com'], blockExplorerUrls: ['https://robinhoodchain.blockscout.com'] }] })
       if (!isCurrentRequest()) return
       await readChain()
       if (!isCurrentRequest()) return
-      networkMessage.value = chainId.value === arcChain.wallet.chainId ? `${arcChain.displayName} is selected in your wallet.` : `Network added. Select ${arcChain.wallet.chainName} in your wallet to use it.`
+      networkMessage.value = chainId.value === '0x1237' ? 'Robinhood Chain is selected in your wallet.' : 'Network added. Select Robinhood Chain in your wallet to use it.'
     } catch (error) { if (isCurrentRequest()) walletError.value = errorMessage(error, 'Network request') }
     finally { networkPending.value = false }
   }
