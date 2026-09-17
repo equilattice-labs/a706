@@ -1,24 +1,24 @@
 // Current presentation identity. Addresses are selected naming targets, not owned services.
 export const brand = Object.freeze({
-  name: 'Cernivue',
-  slug: 'cernivue',
-  tagline: 'A little context. A clearer perspective.',
-  positioning: 'An independent market research desk.',
-  domain: 'cernivue.xyz',
-  handle: '@cernivue',
-  website: 'https://cernivue.xyz',
-  social: 'https://x.com/cernivue',
+  name: 'Clariweft',
+  slug: 'clariweft',
+  tagline: 'Less noise. More perspective.',
+  positioning: 'An independent market signal atlas.',
+  domain: 'clariweft.xyz',
+  handle: '@clariweft',
+  website: 'https://clariweft.xyz',
+  social: 'https://x.com/clariweft',
   channelsActive: false,
-  mark: '/assets/cernivue-mark.svg',
+  mark: '/assets/clariweft-mark.svg',
 })
 
 export const storageKeys = Object.freeze({
-  watchlist: 'cernivue-watchlist',
-  memo: 'cernivue-memo-saved',
+  watchlist: 'clariweft-watchlist',
+  memo: 'clariweft-memo-saved',
 })
 
 // Read-only compatibility with earlier browser data. Never displayed as product identity.
 export const legacyStorageKeys = Object.freeze({
-  watchlist: ['loometric-watchlist', 'siftider-watchlist', 'siftide-watchlist'],
-  memo: ['loometric-memo-saved', 'siftider-memo-saved', 'siftide-memo-saved'],
+  watchlist: ['cernivue-watchlist', 'loometric-watchlist', 'siftider-watchlist', 'siftide-watchlist'],
+  memo: ['cernivue-memo-saved', 'loometric-memo-saved', 'siftider-memo-saved', 'siftide-memo-saved'],
 })

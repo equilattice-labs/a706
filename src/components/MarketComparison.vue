@@ -33,7 +33,7 @@ const signedChange = value => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`
 <template>
   <section class="market-comparison" aria-label="Sample market trend and comparison">
     <div class="comparison-heading">
-      <div><h3>The pattern, in context</h3><p>Illustrative trend · normalized 0–100</p></div>
+      <div><h3>A wider perspective</h3><p>Illustrative trend · normalized 0–100</p></div>
       <span class="comparison-period">7D SAMPLE</span>
     </div>
     <div class="comparison-controls">
@@ -84,22 +84,22 @@ const signedChange = value => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`
 .comparison-period { flex-shrink: 0; padding: 5px 7px; border: 1px solid var(--comparison-line); border-radius: var(--radius); font-size: 9px; letter-spacing: .9px; color: var(--comparison-muted); white-space: nowrap; }
 .comparison-controls { margin: 18px 0 16px; }
 .comparison-controls label { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--comparison-muted); }
-.comparison-controls select { flex: 1; min-width: 0; width: 0; min-height: 44px; padding: 8px 28px 8px 12px; background: var(--paper); color: var(--comparison-text); border: 1px solid var(--comparison-line); border-radius: var(--radius); font: inherit; color-scheme: light; cursor: pointer; }
+.comparison-controls select { flex: 1; min-width: 0; width: 0; min-height: 44px; padding: 8px 28px 8px 12px; background: var(--paper); color: var(--comparison-text); border: 1px solid var(--comparison-line); border-radius: var(--radius); font: inherit; color-scheme: dark; cursor: pointer; }
 .comparison-controls select:hover { border-color: var(--line-strong); }
 .comparison-controls select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .comparison-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 11px; color: var(--comparison-text); }
 .comparison-legend > span { display: inline-flex; align-items: center; gap: 7px; }
 .comparison-legend i { display: inline-block; width: 20px; height: 0; border-top: 2px solid var(--accent); }
-.comparison-legend .secondary-key { border-color: #976035; border-top-style: dashed; }
+.comparison-legend .secondary-key { border-color: #baacf4; border-top-style: dashed; }
 .comparison-chart { display: block; width: 100%; height: auto; overflow: visible; margin: 10px 0 0; }
 .chart-grid { fill: none; stroke: var(--comparison-line); stroke-width: .7; }
 .chart-grid path + path { stroke-dasharray: 2 5; }
 .chart-axis { fill: var(--comparison-muted); font-size: 10px; }
 .primary-trend, .secondary-trend { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .primary-trend { stroke: var(--accent); }
-.secondary-trend { stroke: #976035; stroke-dasharray: 5 5; }
+.secondary-trend { stroke: #baacf4; stroke-dasharray: 5 5; }
 .primary-end { fill: var(--accent); }
-.secondary-end { fill: var(--surface); stroke: #976035; stroke-width: 2; }
+.secondary-end { fill: var(--surface); stroke: #baacf4; stroke-width: 2; }
 .comparison-caption { margin: 8px 0 0; color: var(--comparison-muted); font-size: 10px; line-height: 1.6; }
 .comparison-empty { padding: 32px 12px; text-align: center; color: var(--comparison-muted); font-size: 13px; }
 .comparison-table-wrap { margin-top: 20px; }
@@ -109,7 +109,7 @@ const signedChange = value => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`
 .comparison-table th:first-child { text-align: left; width: 38%; color: var(--comparison-muted); }
 .comparison-table thead th { font-weight: 600; }
 .comparison-table .primary-heading { color: var(--accent); }
-.comparison-table .secondary-heading { color: #976035; }
+.comparison-table .secondary-heading { color: #baacf4; }
 .comparison-table small { padding-left: 2px; color: var(--comparison-muted); font-size: 9px; }
 .comparison-table .is-negative { color: var(--danger); }
 .comparison-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
